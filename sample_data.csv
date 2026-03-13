@@ -1,0 +1,21 @@
+Name,Age,Salary,Department,City,Experience,Rating,Bonus
+Alice,28,52000,Engineering,New York,3,4.2,5000
+Bob,35,78000,Marketing,Chicago,8,3.8,7500
+Charlie,42,95000,Engineering,San Francisco,15,4.6,12000
+Diana,31,61000,HR,New York,5,4.0,6000
+Eve,26,48000,Marketing,Chicago,2,3.5,4500
+Frank,39,88000,Engineering,San Francisco,12,4.4,10000
+Grace,33,67000,HR,Boston,7,4.1,7000
+Hank,45,120000,Engineering,New York,20,4.8,15000
+Ivy,29,55000,Marketing,Boston,4,3.9,5500
+Jack,37,82000,Finance,Chicago,10,4.3,9000
+Karen,41,92000,Finance,San Francisco,14,4.5,11000
+Leo,27,49000,HR,New York,2,3.6,4000
+Mona,34,71000,Engineering,Boston,9,4.2,8000
+Nathan,30,58000,Marketing,Chicago,5,3.7,5500
+Olivia,38,86000,Finance,San Francisco,11,4.4,9500
+Peter,43,98000,Engineering,New York,16,4.7,13000
+Quinn,25,45000,HR,Boston,1,3.4,3500
+Rachel,36,75000,Marketing,Chicago,9,4.0,7500
+Sam,40,,Engineering,San Francisco,13,4.5,
+Tina,32,63000,Finance,,6,4.1,6500
