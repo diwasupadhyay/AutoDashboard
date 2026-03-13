@@ -8,4 +8,4 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: ALLOWED_ORIGINS
-        value: https://autodashboardcsv.app,https://www.autodashboardcsv.app,https://autodashboardcsv.netlify.app/
+        value: https://autodashboardcsv.app,https://www.autodashboardcsv.app,https://autodashboardcsv.netlify.app,https://www.autodashboardcsv.netlify.app
