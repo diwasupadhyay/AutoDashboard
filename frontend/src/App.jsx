@@ -69,7 +69,7 @@ export default function App() {
               <h1 className="font-display text-[1.1rem] font-semibold tracking-tight text-slate-900">
                 Auto Dashboard
               </h1>
-              <p className="text-xs text-slate-600">Auto Dashboard Generator</p>
+              <p className="text-xs text-slate-600">CSV Analytics Dashboard Generator</p>
             </div>
           </div>
           {summary && (
