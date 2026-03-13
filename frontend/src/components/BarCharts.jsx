@@ -57,6 +57,8 @@ export default function BarCharts({ data }) {
                 tick={{ fill: '#1f2937', fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
+                interval={0}
+                minTickGap={0}
                 width={132}
               />
               <Tooltip content={<CustomCategoryTooltip />} />
