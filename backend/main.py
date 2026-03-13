@@ -9,23 +9,32 @@ import pandas as pd
 import numpy as np
 import io
 import json
+import os
+from uuid import uuid4
 
 app = FastAPI(title="Auto Dashboard Generator API")
 
-# CORS – allow the Vite dev server
+# CORS
+_allowed_origins_env = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost",
+)
+_allowed_origins = [o.strip() for o in _allowed_origins_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=_allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
 # ---------------------------------------------------------------------------
-# In-memory store (single-user demo)
+# In-memory store (per-upload session id)
 # ---------------------------------------------------------------------------
-_current_df: pd.DataFrame | None = None
-_current_filename: str = ""
+_datasets: dict[str, dict[str, object]] = {}
+_latest_dataset_id: str | None = None
+_MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024
 
 
 # ---------------------------------------------------------------------------
@@ -37,6 +46,23 @@ def _classify_columns(df: pd.DataFrame):
     numeric = df.select_dtypes(include="number").columns.tolist()
     categorical = df.select_dtypes(exclude="number").columns.tolist()
     return numeric, categorical
+
+
+def _resolve_dataset(dataset_id: str | None) -> tuple[str, pd.DataFrame, str]:
+    """Resolve a dataset id to dataframe + filename with backward-compatible fallback."""
+    global _latest_dataset_id
+
+    resolved_id = dataset_id or _latest_dataset_id
+    if not resolved_id or resolved_id not in _datasets:
+        raise HTTPException(status_code=400, detail="No dataset uploaded yet.")
+
+    dataset = _datasets[resolved_id]
+    df = dataset["df"]
+    filename = str(dataset["filename"])
+    if not isinstance(df, pd.DataFrame):
+        raise HTTPException(status_code=500, detail="Stored dataset is invalid.")
+
+    return resolved_id, df, filename
 
 
 def _safe_json(obj):
@@ -57,22 +83,46 @@ def _safe_json(obj):
 # ---------------------------------------------------------------------------
 @app.post("/upload")
 async def upload_csv(file: UploadFile = File(...)):
-    global _current_df, _current_filename
+    global _latest_dataset_id
 
-    if not file.filename.lower().endswith(".csv"):
+    if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are accepted.")
 
     contents = await file.read()
-    if len(contents) == 0:
+    file_size = len(contents)
+
+    if file_size == 0:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    if file_size > _MAX_FILE_SIZE_BYTES:
+        raise HTTPException(status_code=413, detail="File exceeds 50MB limit.")
 
     try:
-        df = pd.read_csv(io.StringIO(contents.decode("utf-8")))
+        # Try common UTF encodings first for better portability.
+        decoded = contents.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        try:
+            decoded = contents.decode("latin-1")
+        except UnicodeDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="Could not decode file. Please upload UTF-8 or Latin-1 encoded CSV.",
+            )
+
+    try:
+        df = pd.read_csv(io.StringIO(decoded))
+    except pd.errors.EmptyDataError:
+        raise HTTPException(status_code=400, detail="CSV contains headers but no data rows.")
+    except pd.errors.ParserError as e:
+        raise HTTPException(status_code=400, detail=f"Failed to parse CSV: {e}")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse CSV: {e}")
 
-    _current_df = df
-    _current_filename = file.filename
+    dataset_id = str(uuid4())
+    _datasets[dataset_id] = {
+        "df": df,
+        "filename": file.filename,
+    }
+    _latest_dataset_id = dataset_id
 
     numeric_cols, categorical_cols = _classify_columns(df)
 
@@ -87,7 +137,9 @@ async def upload_csv(file: UploadFile = File(...)):
         })
 
     return {
+        "dataset_id": dataset_id,
         "filename": file.filename,
+        "file_size_bytes": file_size,
         "rows": len(df),
         "columns": len(df.columns),
         "column_info": column_info,
@@ -101,11 +153,8 @@ async def upload_csv(file: UploadFile = File(...)):
 # GET /analytics
 # ---------------------------------------------------------------------------
 @app.get("/analytics")
-def get_analytics():
-    if _current_df is None:
-        raise HTTPException(status_code=400, detail="No dataset uploaded yet.")
-
-    df = _current_df
+def get_analytics(dataset_id: str | None = None):
+    _, df, _ = _resolve_dataset(dataset_id)
     numeric_cols, categorical_cols = _classify_columns(df)
 
     # ---- Summary statistics ------------------------------------------------
@@ -136,7 +185,9 @@ def get_analytics():
         series = df[col].dropna()
         if len(series) == 0:
             continue
-        counts, bin_edges = np.histogram(series, bins=min(20, len(series.unique())))
+        unique_values = int(series.nunique())
+        bin_count = max(1, min(20, unique_values))
+        counts, bin_edges = np.histogram(series, bins=bin_count)
         histograms[col] = {
             "bins": [
                 {
@@ -169,11 +220,8 @@ def get_analytics():
 # GET /insights
 # ---------------------------------------------------------------------------
 @app.get("/insights")
-def get_insights():
-    if _current_df is None:
-        raise HTTPException(status_code=400, detail="No dataset uploaded yet.")
-
-    df = _current_df
+def get_insights(dataset_id: str | None = None):
+    _, df, _ = _resolve_dataset(dataset_id)
     numeric_cols, categorical_cols = _classify_columns(df)
 
     # ---- Highest variance --------------------------------------------------

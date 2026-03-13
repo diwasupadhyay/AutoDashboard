@@ -10,8 +10,8 @@ export default function BarCharts({ data }) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {columns.map((col, idx) => (
-        <div key={col} className="glass-card p-5">
-          <h3 className="mb-3 text-sm font-semibold text-text-muted uppercase tracking-wide">
+        <div key={col} className="panel p-5">
+          <h3 className="mb-3 text-sm font-semibold text-slate-600 uppercase tracking-wide">
             {col}
           </h3>
           <ResponsiveContainer width="100%" height={240}>
@@ -20,28 +20,28 @@ export default function BarCharts({ data }) {
               layout="vertical"
               margin={{ top: 4, right: 16, bottom: 4, left: 8 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2e45" horizontal={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#d6dbe8" horizontal={false} />
               <XAxis
                 type="number"
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                tick={{ fill: '#6b7280', fontSize: 11 }}
                 tickLine={false}
-                axisLine={{ stroke: '#2a2e45' }}
+                axisLine={{ stroke: '#d6dbe8' }}
               />
               <YAxis
                 type="category"
                 dataKey="name"
-                tick={{ fill: '#e2e8f0', fontSize: 11 }}
+                tick={{ fill: '#1f2937', fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
                 width={100}
               />
               <Tooltip
                 contentStyle={{
-                  background: '#1c1f2e',
-                  border: '1px solid #2a2e45',
+                  background: '#ffffff',
+                  border: '1px solid #d6dbe8',
                   borderRadius: 10,
                   fontSize: 12,
-                  color: '#e2e8f0',
+                  color: '#0f172a',
                 }}
               />
               <Bar

@@ -18,10 +18,9 @@
 | 📋 **Dataset Summary** | Instant overview — row/column counts, data types, unique values |
 | 📊 **Auto Histograms** | Distribution charts generated for every numeric column |
 | 📈 **Categorical Bar Charts** | Top-N value counts visualized for categorical columns |
-| 🔥 **Correlation Heatmap** | Color-coded matrix showing relationships between numeric features |
 | 🔍 **Smart Insights** | Auto-detects highest variance, missing values, duplicates |
 | 💯 **Data Quality Score** | Completeness percentage with visual progress bar |
-| 🌙 **Dark-Themed UI** | Premium glassmorphism cards, smooth animations, responsive layout |
+| 🎨 **Modern Responsive UI** | Clean, portfolio-ready layout with smooth interactions |
 
 ---
 
@@ -37,7 +36,7 @@
   <img src="screenshots/dashboard-summary.png" alt="Dashboard Summary" width="800"/>
 </p>
 
-### Dashboard — Correlation Heatmap & Charts
+### Dashboard — Charts
 <p align="center">
   <img src="screenshots/dashboard-charts.png" alt="Charts" width="800"/>
 </p>
@@ -76,7 +75,6 @@ autodashboard/
 │   │       ├── DatasetSummary.jsx     # Metrics, table, quality bar
 │   │       ├── Histograms.jsx         # Numeric distributions
 │   │       ├── BarCharts.jsx          # Categorical breakdowns
-│   │       ├── CorrelationHeatmap.jsx # SVG heatmap
 │   │       └── InsightsPanel.jsx      # Variance, missing, duplicates
 │   ├── vite.config.js        # Dev proxy + Recharts config
 │   ├── nginx.conf            # Production reverse proxy
@@ -155,7 +153,7 @@ curl -X POST -F "file=@sample_data.csv" http://localhost:8000/upload
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| Frontend | React 19, Vite 8 | Component-based UI with fast HMR |
+| Frontend | React 19, Vite 7 | Component-based UI with fast HMR |
 | Styling | Tailwind CSS v4 | Utility-first CSS with custom design tokens |
 | Charts | Recharts | Composable, responsive data visualizations |
 | Backend | FastAPI | High-performance async Python API |
@@ -169,11 +167,19 @@ curl -X POST -F "file=@sample_data.csv" http://localhost:8000/upload
 
 | Service | Component | Instructions |
 |---------|-----------|-------------|
-| **Render / Railway** | Backend | Deploy `backend/` as a Python web service |
-| **Vercel / Netlify** | Frontend | Deploy `frontend/` — set build cmd: `npm run build`, output: `dist/` |
+| **Render** | Backend | Use `render.yaml` at repo root to deploy `backend/` with FastAPI |
+| **Netlify** | Frontend | Use `netlify.toml` at repo root to deploy `frontend/` build output |
 | **AWS / GCP** | Full Stack | Use `docker-compose up` on any VM |
 
-> **Note:** When deploying frontend and backend separately, update the Vite proxy config or set a `VITE_API_URL` environment variable to point to your backend URL.
+### Netlify + Render Setup
+
+1. Deploy backend first on Render using `render.yaml`.
+2. Copy the Render backend URL, for example `https://autodashboard-api.onrender.com`.
+3. In Netlify site settings, add environment variable `VITE_API_URL` with that Render URL.
+4. Deploy frontend with `netlify.toml` (base `frontend`, publish `dist`).
+5. In Render, update `ALLOWED_ORIGINS` to your Netlify site domain.
+
+> **Important:** The frontend now supports environment-based API routing through `VITE_API_URL`.
 
 ---
 
