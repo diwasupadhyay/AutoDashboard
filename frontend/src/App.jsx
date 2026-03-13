@@ -67,9 +67,9 @@ export default function App() {
             </div>
             <div>
               <h1 className="font-display text-[1.1rem] font-semibold tracking-tight text-slate-900">
-                Data Atlas Studio
+                Auto Dashboard
               </h1>
-              <p className="text-xs text-slate-600">CSV Analytics Dashboard Generator</p>
+              <p className="text-xs text-slate-600">Auto Dashboard Generator</p>
             </div>
           </div>
           {summary && (
@@ -91,9 +91,6 @@ export default function App() {
         {!summary && !loading && (
           <section className="animate-fade-in grid gap-8 py-12 lg:grid-cols-[1.1fr_1fr] lg:items-center">
             <div>
-              <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-teal-700">
-                Portfolio-ready analytics workspace
-              </p>
               <h2 className="font-display text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-5xl">
                 Turn raw CSV files into decision-grade dashboards.
               </h2>
@@ -173,7 +170,7 @@ export default function App() {
       </main>
 
       <footer className="relative z-10 mt-8 border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-        Data Atlas Studio &copy; {new Date().getFullYear()} • Built for fast analytics storytelling
+        Auto Dashboard Generator &copy; {new Date().getFullYear()} • Built for fast analytics storytelling
       </footer>
     </div>
   )
