@@ -1,0 +1,19 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    # Run every 6 minutes to keep Render free tier from spinning down
+    - cron: '*/6 * * * *'
+  workflow_dispatch:  # Allow manual trigger from Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: |
+          # Ping Render backend directly (most reliable)
+          curl -f https://autodashboard-api.onrender.com/health || echo "Backend keep-alive ping sent"
+          
+          # Also ping frontend domain for redundancy
+          curl -f https://autodashboardcsv.app/health || echo "Frontend keep-alive ping sent"
