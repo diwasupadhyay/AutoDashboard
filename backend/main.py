@@ -79,6 +79,15 @@ def _safe_json(obj):
 
 
 # ---------------------------------------------------------------------------
+# GET /health – Keep-alive endpoint (lightweight, no processing)
+# ---------------------------------------------------------------------------
+@app.get("/health")
+def health_check():
+    """Health check endpoint for keep-alive pings to prevent Render free tier spin-down."""
+    return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
 # POST /upload
 # ---------------------------------------------------------------------------
 @app.post("/upload")

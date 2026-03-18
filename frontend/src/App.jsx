@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import FileUpload from './components/FileUpload'
 import DatasetSummary from './components/DatasetSummary'
@@ -16,6 +16,20 @@ export default function App() {
   const [datasetId, setDatasetId] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  // Keep-alive ping every 7 minutes to prevent Render free tier spin-down
+  useEffect(() => {
+    const keepAliveInterval = setInterval(async () => {
+      try {
+        await api.get('/health')
+      } catch (err) {
+        // Silently fail – this is just a keep-alive ping
+        console.debug('Keep-alive ping failed (non-critical):', err.message)
+      }
+    }, 7 * 60 * 1000) // 7 minutes
+
+    return () => clearInterval(keepAliveInterval)
+  }, [])
 
   const handleUpload = async (file) => {
     setLoading(true)
