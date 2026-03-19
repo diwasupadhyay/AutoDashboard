@@ -15,9 +15,16 @@ function CustomCategoryTooltip({ active, payload }) {
 
   const point = payload[0].payload
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm">
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md">
       <p className="font-semibold text-slate-900">{point.name}</p>
-      <p className="mt-0.5 text-slate-600">Count: {point.count}</p>
+      <p className="mt-1 text-slate-600">
+        Count: <span className="font-medium text-slate-800">{point.count.toLocaleString()}</span>
+      </p>
+      {point.percentage !== undefined && (
+        <p className="text-slate-600">
+          Share: <span className="font-medium text-slate-800">{point.percentage}%</span>
+        </p>
+      )}
     </div>
   )
 }

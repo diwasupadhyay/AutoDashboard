@@ -5,9 +5,22 @@ import DatasetSummary from './components/DatasetSummary'
 import Histograms from './components/Histograms'
 import BarCharts from './components/BarCharts'
 import InsightsPanel from './components/InsightsPanel'
+import KPICards from './components/KPICards'
+import StatisticsCards from './components/StatisticsCards'
+import AutoInsights from './components/AutoInsights'
+import DataPreview from './components/DataPreview'
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || ''
 const api = axios.create({ baseURL: API_BASE, timeout: 30000 })
+
+function SectionHeader({ title, subtitle }) {
+  return (
+    <div className="mb-4">
+      <h2 className="font-display text-xl font-semibold text-slate-900">{title}</h2>
+      {subtitle && <p className="text-sm text-slate-500 mt-0.5">{subtitle}</p>}
+    </div>
+  )
+}
 
 export default function App() {
   const [summary, setSummary] = useState(null)
@@ -60,7 +73,7 @@ export default function App() {
       <div className="bg-orb bg-orb-b" aria-hidden="true" />
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-slate-50/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3.5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-700 text-white font-bold text-sm shadow-soft">
               DA
@@ -87,7 +100,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-[1320px] px-6 py-8 space-y-8">
+      <main className="relative z-10 mx-auto max-w-[1400px] px-6 py-8 space-y-8">
         {!summary && !loading && (
           <section className="animate-fade-in grid gap-8 py-12 lg:grid-cols-[1.1fr_1fr] lg:items-center">
             <div>
@@ -95,7 +108,7 @@ export default function App() {
                 Turn raw CSV files into decision-grade dashboards.
               </h2>
               <p className="mt-4 max-w-xl text-base text-slate-600 md:text-lg">
-                Upload a dataset and get immediate summary metrics, distribution views, and quality insights in one beautiful, responsive interface.
+                Upload a dataset and get immediate KPIs, statistical analysis, and quality metrics in one beautiful, responsive interface.
               </p>
             </div>
             <div className="hero-card">
@@ -109,7 +122,7 @@ export default function App() {
         {loading && (
           <div className="panel flex flex-col items-center justify-center py-28 animate-fade-in">
             <div className="h-12 w-12 rounded-full border-4 border-slate-200 border-t-teal-700 animate-spin mb-4"></div>
-            <p className="font-medium text-slate-600">Processing dataset and generating charts...</p>
+            <p className="font-medium text-slate-600">Processing dataset and generating analytics...</p>
           </div>
         )}
 
@@ -126,11 +139,17 @@ export default function App() {
         )}
 
         {summary && analytics && insights && !loading && (
-          <div className="space-y-8 animate-fade-in">
+          <div className="space-y-10 animate-fade-in">
+            {/* Header with Reset Button */}
             <div className="flex items-center justify-between gap-4">
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900">
-                Dashboard Overview
-              </h2>
+              <div>
+                <h2 className="font-display text-2xl font-semibold tracking-tight text-slate-900">
+                  Dashboard Overview
+                </h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  Comprehensive analytics for {summary.filename}
+                </p>
+              </div>
               <button
                 onClick={resetDashboard}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:border-teal-700 hover:text-teal-700 transition"
@@ -139,32 +158,76 @@ export default function App() {
               </button>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <DatasetSummary data={summary} quality={insights.data_quality} />
-              </div>
-              <div>
-                <InsightsPanel data={insights} />
-              </div>
-            </div>
+            {/* Section 1: KPIs */}
+            <section>
+              <SectionHeader
+                title="Key Performance Indicators"
+                subtitle="Automatically detected metrics from your data"
+              />
+              <KPICards data={analytics} summary={summary} />
+            </section>
 
+            {/* Section 2: Overview Grid - Auto Insights + Data Quality */}
+            <section className="grid gap-6 lg:grid-cols-2">
+              <AutoInsights insights={insights.auto_insights} />
+              <DatasetSummary data={summary} quality={insights.data_quality} />
+            </section>
+
+            {/* Section 3: Data Preview */}
+            {summary.preview && summary.preview.length > 0 && (
+              <section>
+                <SectionHeader
+                  title="Data Preview"
+                  subtitle="First records from your dataset"
+                />
+                <DataPreview data={summary.preview} />
+              </section>
+            )}
+
+            {/* Section 4: Statistical Summary */}
+            {Object.keys(analytics.summary_statistics).length > 0 && (
+              <section>
+                <SectionHeader
+                  title="Statistical Summary"
+                  subtitle="Detailed statistics for each numeric column"
+                />
+                <StatisticsCards
+                  data={analytics.summary_statistics}
+                  outliers={analytics.outliers}
+                />
+              </section>
+            )}
+
+            {/* Section 5: Numeric Distributions */}
             {Object.keys(analytics.histograms).length > 0 && (
               <section>
-                <h2 className="mb-4 font-display text-xl font-semibold text-slate-900">
-                  Numeric Distributions
-                </h2>
+                <SectionHeader
+                  title="Numeric Distributions"
+                  subtitle="Value distribution histograms"
+                />
                 <Histograms data={analytics.histograms} />
               </section>
             )}
 
+            {/* Section 6: Categorical Analysis */}
             {Object.keys(analytics.bar_charts).length > 0 && (
               <section>
-                <h2 className="mb-4 font-display text-xl font-semibold text-slate-900">
-                  Categorical Breakdown
-                </h2>
+                <SectionHeader
+                  title="Categorical Analysis"
+                  subtitle="Top values for categorical columns"
+                />
                 <BarCharts data={analytics.bar_charts} />
               </section>
             )}
+
+            {/* Section 7: Data Quality */}
+            <section>
+              <SectionHeader
+                title="Data Quality Report"
+                subtitle="Missing values, duplicates, and data health"
+              />
+              <InsightsPanel data={insights} />
+            </section>
           </div>
         )}
       </main>
